@@ -12,6 +12,7 @@ import org.apache.http.util.EntityUtils;
 import java.io.IOException;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
+import java.time.LocalDate;
 import java.util.Objects;
 import java.util.Optional;
 
@@ -29,8 +30,19 @@ public class NasaOpenApiServiceImpl {
     }
 
     public Optional<ApodResponse> getAstronomyPictureOfTheDay() {
-        String url = APOD_URL + "?api_key=" + API_KEY_VALUE;
-        HttpGet request = new HttpGet(url);
+        return getAstronomyPictureOfTheDay(null);
+    }
+
+    public Optional<ApodResponse> getAstronomyPictureOfTheDay(LocalDate date) {
+        StringBuilder url = new StringBuilder(APOD_URL)
+                .append("?api_key=").append(API_KEY_VALUE)
+                .append("&thumbs=true");
+
+        if (date != null) {
+            url.append("&date=").append(date);
+        }
+
+        HttpGet request = new HttpGet(url.toString());
         request.setHeader(HttpHeaders.ACCEPT, ContentType.APPLICATION_JSON.getMimeType());
 
         try (CloseableHttpResponse response = httpClient.execute(request)) {

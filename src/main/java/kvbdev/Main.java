@@ -5,7 +5,6 @@ import org.apache.http.client.config.RequestConfig;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
 
-import java.net.URI;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
@@ -17,18 +16,16 @@ public class Main {
 
             NasaOpenApiServiceImpl nasaOpenApiService = new NasaOpenApiServiceImpl(httpClient);
 
-            String apodUrl = nasaOpenApiService.getAstronomyPictureOfTheDay()
-                    .map(ApodResponse::getUrl)
-                    .orElseThrow();
+            ApodResponse apod = nasaOpenApiService.getAstronomyPictureOfTheDay().orElseThrow();
 
-            Path fileName = Path.of(new URI(apodUrl).getPath()).getFileName();
+            String imageUrl = apod.getPreviewImageUrl();
+            Path filePath = Path.of(imageUrl.substring(imageUrl.lastIndexOf('/') + 1));
 
-            Files.write(fileName, nasaOpenApiService.download(apodUrl)
-                    .orElseThrow());
+            Files.write(filePath, nasaOpenApiService.download(imageUrl).orElseThrow());
 
-            if (Files.exists(fileName) && Files.size(fileName) > 0) {
+            if (Files.exists(filePath) && Files.size(filePath) > 0) {
                 System.out.println("Astronomy Picture of the Day was successfully downloaded");
-                System.out.println(fileName + " has size " + Files.size(fileName) + " bytes");
+                System.out.println(filePath + " has size " + Files.size(filePath) + " bytes");
             }
 
         }
